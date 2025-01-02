@@ -1,19 +1,4 @@
 "use strict";
-class Person {
-    constructor(id, name, email, phone) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-    }
-    getDetails() {
-        console.log("Thông tin của khách hàng");
-        console.log(`ID: ${this.id}`);
-        console.log(`Name: ${this.name}`);
-        console.log(`Email: ${this.email}`);
-        console.log(`Phone: ${this.phone}`);
-    }
-}
 class Room {
     constructor(roomId, type, pricePerNight, isAvailable) {
         this.roomId = roomId;
@@ -27,75 +12,51 @@ class Room {
     releaseRoom() {
         this.isAvailable = true;
     }
+    calculateCost(nights) {
+        return this.pricePerNight * nights;
+    }
 }
+
 class StandarRoom extends Room {
     constructor(roomId, type, pricePerNight, isAvailable) {
         super(roomId, type, pricePerNight, isAvailable);
     }
-    calculateCost(nights) {
-        return this.pricePerNight * nights;
-    }
-    getAdditionalServices() {
-    }
-    applyDiscount(discountRate) {
-        return this.pricePerNight * discountRate;
-    }
-    getCancellationPolicy() {
-        console.log("Hoàn lại 100% nếu hủy trước 1 ngày.");
-    }
 }
+
 class DeluxeRoom extends Room {
     constructor(roomId, type, pricePerNight, isAvailable) {
         super(roomId, type, pricePerNight, isAvailable);
     }
-    calculateCost(nights) {
-        return this.pricePerNight * nights;
-    }
-    getAdditionalServices() {
-    }
-    applyDiscount(discountRate) {
-        return this.pricePerNight * discountRate;
-    }
-    getCancellationPolicy() {
-        console.log("Hoàn lại 50% nếu hủy trước 2 ngày.");
-    }
 }
+
 class SuiteRoom extends Room {
     constructor(roomId, type, pricePerNight, isAvailable) {
         super(roomId, type, pricePerNight, isAvailable);
     }
-    calculateCost(nights) {
-        return this.pricePerNight * nights;
-    }
-    getAdditionalServices() {
-    }
-    applyDiscount(discountRate) {
-        return this.pricePerNight * discountRate;
-    }
-    getCancellationPolicy() {
-        console.log("Không hoàn lại tiền nếu hủy.");
+}
+
+class Person {
+    constructor(id, name, email, phone) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
     }
 }
+
 class Booking {
-    constructor(bookingId, customer, room, nights, totalCost) {
-        this.bookingId = bookingId;
+    constructor(id, customer, room, nights, totalCost) {
+        this.id = id;
         this.customer = customer;
         this.room = room;
         this.nights = nights;
         this.totalCost = totalCost;
     }
     getDetails() {
-        console.log("Thông tin chi tiết đặt phòng");
-        console.log(`BookingId: ${this.bookingId}`);
-        console.log(`Nights: ${this.nights}`);
-        console.log(`Total Cost: ${this.totalCost}`);
-        console.log(`RoomId: ${this.room.roomId}`);
-        console.log(`Type: ${this.room.type}`);
-        console.log(`Price per Night: ${this.room.pricePerNight}`);
-        console.log(`Trạng thái phòng: ${this.room.isAvailable}`);
-        this.customer.getDetails();
+        return `Booking ID: ${this.id}\nCustomer: ${this.customer.name}\nRoom: ${this.room.type}\nNights: ${this.nights}\nTotal Cost: ${this.totalCost}`;
     }
 }
+
 class HotelManager {
     constructor() {
         this.rooms = [];
@@ -105,15 +66,15 @@ class HotelManager {
     addRoom(type, pricePerNight) {
         switch (type) {
             case "StandarRoom":
-                let roomStand = new StandarRoom(Math.random(), type, pricePerNight, false);
+                let roomStand = new StandarRoom(Math.random(), type, pricePerNight, true);
                 this.rooms.push(roomStand);
                 break;
             case "DeluxeRoom":
-                let roomDelux = new DeluxeRoom(Math.random(), type, pricePerNight, false);
+                let roomDelux = new DeluxeRoom(Math.random(), type, pricePerNight, true);
                 this.rooms.push(roomDelux);
                 break;
             case "SuiteRoom":
-                let roomSuite = new SuiteRoom(Math.random(), type, pricePerNight, false);
+                let roomSuite = new SuiteRoom(Math.random(), type, pricePerNight, true);
                 this.rooms.push(roomSuite);
                 break;
         }
@@ -124,43 +85,42 @@ class HotelManager {
         return customer;
     }
     bookRoom(customerId, roomId, nights) {
-        let customer = this.customers.find(cu => cu.id);
-        let room = this.rooms.find(r => r.roomId);
+        let customer = this.customers.find(cu => cu.id === customerId);
+        let room = this.rooms.find(r => r.roomId === roomId);
         if (customer === undefined || room === undefined) {
-            console.log("Không tìm thấy");
+            console.log("Khong tim thay");
             return this.bookings[-1];
-        }
-        else {
+        } else {
             let total = room.calculateCost(nights);
             let booking = new Booking(Math.random(), customer, room, nights, total);
             this.bookings.push(booking);
+            room.bookRoom();
             return booking;
         }
     }
     releaseRoom(roomId) {
         let room = this.rooms.find(r => r.roomId === roomId);
         if (room === undefined) {
-            console.log("Không tìm thấy");
-        }
-        else {
+            console.log("Khong tim thay");
+        } else {
             room.releaseRoom();
         }
     }
     listAvailableRooms() {
-        console.log("Danh sách phòng còn trống:");
-        this.rooms.filter(function (element, index) {
+        console.log("Danh sach phong con trong:");
+        this.rooms.filter(function (element) {
             if (element.isAvailable === true) {
                 console.log(`RoomId: ${element.roomId}`);
                 console.log(`Type: ${element.type}`);
                 console.log(`Price per Night: ${element.pricePerNight}`);
-                console.log(`Trạng thái phòng: ${element.isAvailable}`);
+                console.log(`Trang thai phong: ${element.isAvailable}`);
                 console.log("-------------------------------------------");
             }
         });
     }
     listBookingsByCustomer(customerId) {
-        console.log("Danh sách đặt phòng của một khách hàng");
-        this.bookings.filter(function (element, index) {
+        console.log("Danh sach dat phong cua mot khach hang");
+        this.bookings.filter(function (element) {
             if (element.customer.id === customerId) {
                 element.getDetails();
                 console.log("--------------------");
@@ -168,40 +128,156 @@ class HotelManager {
         });
     }
     calculateTotalRevenue() {
-        return this.bookings.reduce((acc, curent) => acc + curent.totalCost, 0);
+        return this.bookings.reduce((acc, current) => acc + current.totalCost, 0);
     }
     getRoomTypesCount() {
-        let sumStand = 0;
-        let sumDulex = 0;
-        let sumSuite = 0;
-        this.rooms.reduce((acc, curr) => {
-            acc[curr.type] = (acc[curr.type] || 0) + 1;
+        let roomCount = this.rooms.reduce((acc, room) => {
+            acc[room.type] = (acc[room.type] || 0) + 1;
             return acc;
         }, {});
+        console.log(roomCount);
+    }
+    applyDiscountToRoom(roomId, discountRate) {
+        let room = this.rooms.find(r => r.roomId === roomId);
+        if (room) {
+            let discountedPrice = room.pricePerNight * (1 - discountRate / 100);
+            console.log(`Discounted Price for Room ${roomId}: ${discountedPrice}`);
+        } else {
+            console.log("Room not found");
+        }
+    }
+    getRoomServices(roomId) {
+        let room = this.rooms.find(r => r.roomId === roomId);
+        if (room) {
+            console.log("Additional services for room: ", room.type);
+        }
+    }
+    getCancellationPolicy(roomId) {
+        let room = this.rooms.find(r => r.roomId === roomId);
+        if (room) {
+            console.log("Cancellation policy for room: ", room.type);
+        }
     }
 }
+
 class Main {
     constructor() {
         this.hotelManager = new HotelManager();
     }
     boostrap() {
-        console.log("Menu chức năng");
-        console.log("1.Thêm khách hàng");
-        console.log("2.Thêm phòng. 	");
-        console.log("3.Đặt phòng. 		");
-        console.log("4.Trả phòng.");
-        console.log("5.Hiển thị danh sách phòng còn trống");
-        console.log("6.Thêm khách hàng");
-        console.log("7.Thêm khách hàng");
-        console.log("8.Thêm khách hàng");
-        console.log("9.Thêm khách hàng");
-        console.log("10.Thêm khách hàng");
+        console.log("Menu chuc nang:");
+        console.log("1. Them khach hang");
+        console.log("2. Them phong");
+        console.log("3. Dat phong");
+        console.log("4. Tra phong");
+        console.log("5. Hien thi danh sach phong con trong");
+        console.log("6. Hien thi danh sach dat phong cua khach hang");
+        console.log("7. Tinh tong doanh thu");
+        console.log("8. Dem so luong tung loai phong");
+        console.log("9. Ap dung giam gia cho phong");
+        console.log("10. Hien thi cac dich vu bo sung cua phong");
+        console.log("11. Hien thi chinh sach huy phong");
+        console.log("12. Thoat chuong trinh");
+        const readline = require('readline');
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
         let check = true;
-        while (check) {
-            let input = String("Hãy nhập vào từ 1-10 để điều khiển chương trình");
-            switch (input) {
-                case "1":
-            }
-        }
+        const getMenuChoice = () => {
+            rl.question('Nhap lua chon: ', (input) => {
+                switch (input) {
+                    case "1":
+                        rl.question("Nhap ten khach hang: ", (name) => {
+                            rl.question("Nhap email: ", (email) => {
+                                rl.question("Nhap so dien thoai: ", (phone) => {
+                                    const customer = this.hotelManager.addCustomer(name, email, phone);
+                                    console.log("Khach hang da them: ", customer);
+                                    getMenuChoice();
+                                });
+                            });
+                        });
+                        break;
+                    case "2":
+                        rl.question("Nhap loai phong (StandarRoom, DeluxeRoom, SuiteRoom): ", (type) => {
+                            rl.question("Nhap gia phong moi dem: ", (pricePerNight) => {
+                                this.hotelManager.addRoom(type, parseFloat(pricePerNight));
+                                console.log("Phong da them");
+                                getMenuChoice();
+                            });
+                        });
+                        break;
+                    case "3":
+                        rl.question("Nhap ID khach hang: ", (customerId) => {
+                            rl.question("Nhap ID phong: ", (roomId) => {
+                                rl.question("Nhap so dem: ", (nights) => {
+                                    const booking = this.hotelManager.bookRoom(Number(customerId), Number(roomId), Number(nights));
+                                    console.log("Dat phong thanh cong:", booking.getDetails());
+                                    getMenuChoice();
+                                });
+                            });
+                        });
+                        break;
+                    case "4":
+                        rl.question("Nhap ID phong de tra: ", (roomId) => {
+                            this.hotelManager.releaseRoom(Number(roomId));
+                            console.log("Phong da duoc tra.");
+                            getMenuChoice();
+                        });
+                        break;
+                    case "5":
+                        this.hotelManager.listAvailableRooms();
+                        getMenuChoice();
+                        break;
+                    case "6":
+                        rl.question("Nhap ID khach hang: ", (customerId) => {
+                            this.hotelManager.listBookingsByCustomer(Number(customerId));
+                            getMenuChoice();
+                        });
+                        break;
+                    case "7":
+                        const revenue = this.hotelManager.calculateTotalRevenue();
+                        console.log("Tong doanh thu: ", revenue);
+                        getMenuChoice();
+                        break;
+                    case "8":
+                        this.hotelManager.getRoomTypesCount();
+                        getMenuChoice();
+                        break;
+                    case "9":
+                        rl.question("Nhap ID phong de ap dung giam gia: ", (roomId) => {
+                            rl.question("Nhap ti le giam gia: ", (discountRate) => {
+                                this.hotelManager.applyDiscountToRoom(Number(roomId), parseFloat(discountRate));
+                                getMenuChoice();
+                            });
+                        });
+                        break;
+                    case "10":
+                        rl.question("Nhap ID phong de hien thi dich vu bo sung: ", (roomId) => {
+                            this.hotelManager.getRoomServices(Number(roomId));
+                            getMenuChoice();
+                        });
+                        break;
+                    case "11":
+                        rl.question("Nhap ID phong de hien thi chinh sach huy phong: ", (roomId) => {
+                            this.hotelManager.getCancellationPolicy(Number(roomId));
+                            getMenuChoice();
+                        });
+                        break;
+                    case "12":
+                        console.log("Thoat chuong trinh.");
+                        rl.close();
+                        check = false;
+                        break;
+                    default:
+                        console.log("Lua chon khong hop le. Vui long nhap lai.");
+                        getMenuChoice();
+                        break;
+                }
+            });
+        };
+        getMenuChoice();
     }
 }
+const app = new Main();
+app.boostrap();
